@@ -6,13 +6,6 @@ There are two structure of db. feel free to choose what you like.
 1. One Table 
 
 | id | type | code | khmer_name | name | sub_of |
-| --- | --- | --- |  --- |  --- |  --- |  --- |
-| 1 | ខេត្ត​ | 1 |  បន្ទាយមានជ័យ |  Banteay Meanchey |  |
-| 2 | ស្រុក | 102 |  មង្គលបូរី |  Mongkol Borei | 1 |
-| 3 | ឃុំ | 10201 |  បន្ទាយនាង |  Banteay Neang | 2 |
-| 4 | ភូមិ | 1020101 |  អូរធំ |  Ou Thum | 3 |
-
-| Command | Description | Command | Description | Command | Description |
 | --- | --- | --- | --- | --- | --- |
 | 1 | ខេត្ត​ | 1 |  បន្ទាយមានជ័យ |  Banteay Meanchey |  |
 | 2 | ស្រុក | 102 |  មង្គលបូរី |  Mongkol Borei | 1 |
