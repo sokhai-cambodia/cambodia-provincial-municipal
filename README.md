@@ -1,46 +1,110 @@
-# Cambodia Province/Municipal
-This is Cambodia address database in mysql
+# Cambodia Provinces, Districts, Communes and Villages
 
-## Database Structure
-There are two structure of db. feel free to choose what you like.
-1. One Table 
+Every administrative division in Cambodia (25 provinces, 210 districts, 1,652 communes and
+14,578 villages) with official codes and names in Khmer and English, ready to import into
+**PostgreSQL** or **MySQL**, or open as **CSV** in Excel.
 
-| id | type | code | khmer_name | name | sub_of |
-| --- | --- | --- | --- | --- | --- |
-| 1 | ខេត្ត​ | 1 |  បន្ទាយមានជ័យ |  Banteay Meanchey |  |
-| 2 | ស្រុក | 102 |  មង្គលបូរី |  Mongkol Borei | 1 |
-| 3 | ឃុំ | 10201 |  បន្ទាយនាង |  Banteay Neang | 2 |
-| 4 | ភូមិ | 1020101 |  អូរធំ |  Ou Thum | 3 |
+Data retrieved from the NCDD Gazetteer on **2026-11-15**.
 
-2. Seperate Table
-> Province
+| Level | Types | Count |
+| --- | --- | --- |
+| 1 | រាជធានី Capital, ខេត្ត Province | 25 |
+| 2 | ក្រុង Municipality, ស្រុក District, ខណ្ឌ Khan | 210 |
+| 3 | ឃុំ Commune, សង្កាត់ Sangkat | 1,652 |
+| 4 | ភូមិ Village | 14,578 |
 
-| id | type | code | khmer_name | name |
-| --- | --- | --- | --- | --- |
-| 1 | ខេត្ត​ | 1 |  បន្ទាយមានជ័យ |  Banteay Meanchey |
-| 2 | ខេត្ត​ | 2 |  បាត់ដំបង |  Battambang |
+## Import
 
-> District
+```bash
+# PostgreSQL
+psql -d your_db -f db/postgres/locations.sql
 
-| id | type | code | khmer_name | name | province_id |
-| --- | --- | --- | --- | --- | --- |
-| 1 | ស្រុក | 102 |  មង្គលបូរី |  Mongkol Borei | 1 |
-| 2 | ស្រុក | 103 |  ភ្នំស្រុក |  Phnum Srok | 1 |
+# MySQL 8
+mysql --default-character-set=utf8mb4 your_db < db/mysql/locations.sql
+```
 
-> Commune
+Each file drops and recreates the `locations` and `location_types` tables.
 
-| id | type | code | khmer_name | name | province_id | district_id |
-| --- | --- | --- | --- | --- | --- | --- |
-| 1 | ឃុំ | 10201 |  បន្ទាយនាង |  Banteay Neang | 1 | 1 |
-| 2 | ឃុំ | 10201 |  បត់ត្រង់ |  Bat Trang | 1 | 1 |
+### CSV (Excel, Google Sheets, pandas, anything else)
 
-> Village
+- [`data/locations.csv`](data/locations.csv): one row per location, with the type names included, so no lookup is needed.
+- [`data/location_types.csv`](data/location_types.csv): the 8 types.
 
-| id | type | code | khmer_name | name | province_id | district_id | commune_id |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| 1 | ភូមិ | 1020101 |  អូរធំ |  Ou Thum | 1 | 1 | 1 |
-| 2 | ភូមិ | 1020102 |  ភ្នំ |  Phnum | 1 | 1 | 1 |
+The files are UTF-8 with a BOM, so Khmer text shows correctly in Excel.
 
-## Reference
+> **Excel tip: keep the leading zeros in codes.** If you double-click the CSV, Excel turns
+> code `0102` into `102`. Instead, use **Data → From Text/CSV**, click **Transform Data**,
+> set `code` and `parent_code` to **Text**, then **Close & Load**. Google Sheets: **File → Import**
+> and untick "Convert text to numbers, dates, and formulas".
 
-http://db.ncdd.gov.kh/gazetteer/view/index.castle
+## Schema
+
+**`location_types`**: the 8 kinds of location.
+
+| id | level | name_km | name_en |
+| --- | --- | --- | --- |
+| 1 | 1 | ខេត្ត | Province |
+| 2 | 1 | រាជធានី | Capital |
+| 3 | 2 | ស្រុក | District |
+| 4 | 2 | ក្រុង | Municipality |
+| 5 | 2 | ខណ្ឌ | Khan |
+| 6 | 3 | ឃុំ | Commune |
+| 7 | 3 | សង្កាត់ | Sangkat |
+| 8 | 4 | ភូមិ | Village |
+
+**`locations`**: one row per location.
+
+| column | type | notes |
+| --- | --- | --- |
+| `code` | varchar(8), primary key | Official NCDD code, zero-padded: 2 digits province, 4 district, 6 commune, 8 village |
+| `parent_code` | varchar(8), FK → `locations.code` | `NULL` for provinces |
+| `level` | smallint | 1 province, 2 district, 3 commune, 4 village |
+| `type_id` | smallint, FK → `location_types.id` | |
+| `name_km` | text | Khmer name, without the type prefix (`បន្ទាយមានជ័យ`, not `ខេត្តបន្ទាយមានជ័យ`) |
+| `name_en` | text, nullable | Latin name. `NULL` where NCDD has no English name yet (currently 1 village) |
+
+The code encodes the hierarchy: village `12010101` is in commune `120101`, district `1201` and province `12`.
+Codes are stable official identifiers, so it is safe to store them in your own tables.
+
+### Example queries
+
+```sql
+-- Districts of Phnom Penh
+SELECT a.code, t.name_en AS type, a.name_km, a.name_en
+FROM locations a JOIN location_types t ON t.id = a.type_id
+WHERE a.parent_code = '12'
+ORDER BY a.code;
+
+-- Full address of a village
+SELECT v.name_km, c.name_km AS commune, d.name_km AS district, p.name_km AS province
+FROM locations v
+JOIN locations c ON c.code = v.parent_code
+JOIN locations d ON d.code = c.parent_code
+JOIN locations p ON p.code = d.parent_code
+WHERE v.code = '12010101';
+```
+
+## Updating the data
+
+```bash
+python scripts/update.py            # uses cached downloads in .cache/ if present
+python scripts/update.py --refresh  # download everything from NCDD again
+```
+
+The script needs Python 3.10+ and nothing else. It downloads the index page and one Excel
+export per province (25 requests, 3 seconds apart), checks the counts against NCDD's own
+totals, and regenerates the SQL and CSV files. If the counts don't match, it stops without writing anything.
+
+## Upgrading from v1 (2019)
+
+v2 is a breaking change: the table is now `locations` (was `addresses`), and the columns and IDs
+are all different. Store `code` instead of the old `id`. The old files are in [`archive/2019/`](archive/2019) and are no longer updated.
+
+## Source and license
+
+Source: [NCDD Gazetteer Database Online](https://db.ncdd.gov.kh/gazetteer/view/index.castle),
+National Committee for Sub-National Democratic Development, Royal Government of Cambodia.
+
+This is an **unofficial** copy, shared to make the data easier to use. NCDD does not publish
+a license or terms of use for the gazetteer. For official purposes, check against the source.
+If you represent NCDD and have concerns about this repository, please open an issue.
