@@ -7,7 +7,7 @@ scraped from the NCDD Gazetteer and published as SQL (PostgreSQL, MySQL) and CSV
 ## Layout
 
 - `scripts/update.py`: the only source of truth for the data. Fetches NCDD, validates, writes the SQL and CSV files. Python 3.10+, standard library only (keep it that way, so users don't need `pip install`).
-- `db/postgres/locations.sql`, `db/mysql/locations.sql`, `data/locations.csv`, `data/location_types.csv`: **generated**. Never edit by hand; change the script and re-run.
+- `data/postgres/locations.sql`, `data/mysql/locations.sql`, `data/csv/locations.csv`, `data/csv/location_types.csv`: **generated**. Never edit by hand; change the script and re-run.
 - CSVs are written as `utf-8-sig` (with BOM) on purpose, so Excel renders Khmer. Don't drop the BOM. Codes stay zero-padded strings; the README explains how Excel users keep the zeros.
 - `archive/2019/`: frozen v1 dumps. Do not modify or regenerate.
 - `.cache/`: raw NCDD downloads (git-ignored). Delete it or pass `--refresh` to re-download.
@@ -47,8 +47,8 @@ Load both files into throwaway containers and run sanity queries (counts per typ
 ```bash
 docker run -d --rm --name gz-pg -e POSTGRES_PASSWORD=test postgres:16
 docker run -d --rm --name gz-my -e MYSQL_ROOT_PASSWORD=test -e MYSQL_DATABASE=gz mysql:8.4
-docker exec -i gz-pg psql -v ON_ERROR_STOP=1 -U postgres < db/postgres/locations.sql
-docker exec -i gz-my mysql -uroot -ptest --default-character-set=utf8mb4 gz < db/mysql/locations.sql
+docker exec -i gz-pg psql -v ON_ERROR_STOP=1 -U postgres < data/postgres/locations.sql
+docker exec -i gz-my mysql -uroot -ptest --default-character-set=utf8mb4 gz < data/mysql/locations.sql
 docker stop gz-pg gz-my
 ```
 

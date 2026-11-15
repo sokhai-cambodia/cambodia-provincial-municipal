@@ -10,8 +10,8 @@ How it works:
   2. Download each province's Excel export (25 requests, a few seconds apart).
      NCDD's "complete gazetteer" download is broken (HTTP 500), so we use the
      per-province export instead.
-  3. Normalise, validate, and write db/mysql/locations.sql,
-     db/postgres/locations.sql and data/*.csv.
+  3. Normalise, validate, and write data/mysql/locations.sql,
+     data/postgres/locations.sql and data/csv/*.csv.
 
 Raw downloads are cached in .cache/ so re-runs don't hit NCDD again.
 Use --refresh to ignore the cache and download everything fresh.
@@ -40,10 +40,10 @@ PROVINCE_URL = f"{BASE}/province/downloadprovince.castle"
 
 ROOT = Path(__file__).resolve().parent.parent
 CACHE = ROOT / ".cache"
-OUT_MYSQL = ROOT / "db" / "mysql" / "locations.sql"
-OUT_POSTGRES = ROOT / "db" / "postgres" / "locations.sql"
-OUT_CSV = ROOT / "data" / "locations.csv"
-OUT_TYPES_CSV = ROOT / "data" / "location_types.csv"
+OUT_MYSQL = ROOT / "data" / "mysql" / "locations.sql"
+OUT_POSTGRES = ROOT / "data" / "postgres" / "locations.sql"
+OUT_CSV = ROOT / "data" / "csv" / "locations.csv"
+OUT_TYPES_CSV = ROOT / "data" / "csv" / "location_types.csv"
 
 USER_AGENT = "cambodia-gazetteer-sync/2.0 (+open data mirror)"
 DELAY_SECONDS = 3

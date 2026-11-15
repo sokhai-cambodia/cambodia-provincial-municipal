@@ -10,4 +10,4 @@ Known issues in these files:
 - `id` values are auto-increment numbers, not official codes, and are not stable between versions.
 - `type` values contain a hidden zero-width space (`'ខេត្ត​'`), so `WHERE type = 'ខេត្ត'` matches nothing.
 
-Use the current data in [`db/`](../../db) instead.
+Use the current data in [`data/`](../../data) instead.
