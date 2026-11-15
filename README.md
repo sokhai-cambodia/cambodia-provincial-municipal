@@ -4,7 +4,8 @@ Every administrative division in Cambodia (25 provinces, 210 districts, 1,652 co
 14,578 villages) with official codes and names in Khmer and English, ready to import into
 **PostgreSQL** or **MySQL**, or open as **CSV** in Excel.
 
-Data retrieved from the NCDD Gazetteer on **2026-11-15**.
+Data retrieved from the NCDD Gazetteer on **2026-11-15**. It includes every reorganization up to
+the newest one we could confirm, **Kampong Som municipality (August 2024)**. See [How current is the data?](#how-current-is-the-data)
 
 | Level | Types | Count |
 | --- | --- | --- |
@@ -81,6 +82,9 @@ The files are UTF-8 with a BOM, so Khmer text shows correctly in Excel.
 The code encodes the hierarchy: village `12010101` is in commune `120101`, district `1201` and province `12`.
 Codes are stable official identifiers, so it is safe to store them in your own tables.
 
+Names are kept exactly as NCDD spells them, including official romanizations that differ from
+common usage (e.g. `Siemreap`, `Mondul Kiri`, `Ratanak Kiri`, `Kaoh Rung`).
+
 ### Example queries
 
 ```sql
@@ -102,13 +106,33 @@ WHERE v.code = '12010101';
 ## Updating the data
 
 ```bash
-python scripts/sync_ncdd.py            # uses cached downloads in .cache/ if present
-python scripts/sync_ncdd.py --refresh  # download everything from NCDD again
+python scripts/sync_ncdd.py --refresh  # download the latest from NCDD and rebuild everything
+python scripts/sync_ncdd.py            # rebuild from the cached downloads in .cache/ (no network)
 ```
+
+> Always use `--refresh` to get the latest data. Without it, the script reuses whatever is in
+> `.cache/`, however old, and the output only looks current.
 
 The script needs Python 3.10+ and nothing else. It downloads the index page and one Excel
 export per province (25 requests, 3 seconds apart), checks the counts against NCDD's own
 totals, and regenerates the SQL and CSV files. If the counts don't match, it stops without writing anything.
+
+## How current is the data?
+
+The files match NCDD exactly as of the retrieval date above. NCDD publishes no "last updated"
+date, so we checked it against known reorganizations. All of these are included:
+
+| Change | Date | Codes |
+| --- | --- | --- |
+| Oudong Me Chey, Samakki Munichey, Bokor, Sompov Poun, Arey Ksat, Ou Krieng Sen Chey | Dec 2022 | 0509, 0510, 0709, 0812, 0813, 1007 |
+| Run Ta Ek Techo Sen municipality (Siem Reap) | Jan 2024 | 1715 |
+| Kampong Som municipality (Preah Sihanouk), 5 sangkats taken from Prey Nob | Aug 2024 | 1806 |
+
+We found no 2025–2026 sub-decree creating new districts or municipalities as of the
+retrieval date. If you know of a change NCDD hasn't entered yet, please open an issue.
+
+Compared with the 2019 v1 data: 8 districts added and 1 removed (Odongk → Oudong Me Chey),
+51 communes added and 45 removed, 690 villages added and 484 removed, and 38 names changed.
 
 ## Upgrading from v1 (2019)
 

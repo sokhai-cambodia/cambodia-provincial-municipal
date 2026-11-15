@@ -54,6 +54,19 @@ docker stop gz-pg gz-my
 
 On Git Bash for Windows, set `MSYS_NO_PATHCONV=1` first.
 
+## Checking freshness
+
+NCDD has no "last updated" date, and most of its legal references are undated. To judge whether a
+sync is current, check the newest known reorganizations (news, Wikipedia) against the data. As of
+2026-11-15 the newest confirmed one is Kampong Som municipality (`1806`, Aug 2024). Keep the
+"How current is the data?" table in the README up to date after each `--refresh` sync, along with the
+retrieval date and the counts.
+
+- Always sync with `--refresh` when updating the published data; the cache never expires.
+- Keep NCDD's own spellings (`Siemreap`, `Kaoh Rung`, …). Don't "fix" names by hand.
+- Press reports can be wrong (Khmer Times said Prey Nob had 12 communes; NCDD and the 2019 data both
+  show 15). Trust NCDD's per-province counts unless a sub-decree says otherwise.
+
 ## Licensing
 
 NCDD publishes no license. Keep the README's "unofficial copy, source: NCDD" notice and the source line in the SQL headers.
