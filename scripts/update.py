@@ -326,13 +326,13 @@ def write_csv(rows: list[Row]) -> None:
     OUT_CSV.parent.mkdir(parents=True, exist_ok=True)
     types_by_id = {tid: (km, lvl, en) for km, (tid, lvl, en) in TYPES.items()}
     with OUT_TYPES_CSV.open("w", encoding="utf-8-sig", newline="") as f:
-        w = csv.writer(f)
+        w = csv.writer(f, lineterminator="\n")
         w.writerow(["id", "level", "name_km", "name_en"])
         for tid in sorted(types_by_id):
             km, lvl, en = types_by_id[tid]
             w.writerow([tid, lvl, km, en])
     with OUT_CSV.open("w", encoding="utf-8-sig", newline="") as f:
-        w = csv.writer(f)
+        w = csv.writer(f, lineterminator="\n")
         w.writerow(["code", "parent_code", "level", "type_id", "type_km", "type_en", "name_km", "name_en"])
         for r in rows:
             km, _, en = types_by_id[r.type_id]
