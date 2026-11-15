@@ -6,7 +6,7 @@ scraped from the NCDD Gazetteer and published as SQL (PostgreSQL, MySQL) and CSV
 
 ## Layout
 
-- `scripts/update.py`: the only source of truth for the data. Fetches NCDD, validates, writes the SQL and CSV files. Python 3.10+, standard library only (keep it that way, so users don't need `pip install`).
+- `scripts/sync_ncdd.py`: the only source of truth for the data. Fetches NCDD, validates, writes the SQL and CSV files. Python 3.10+, standard library only (keep it that way, so users don't need `pip install`).
 - `data/postgres/locations.sql`, `data/mysql/locations.sql`, `data/csv/locations.csv`, `data/csv/location_types.csv`: **generated**. Never edit by hand; change the script and re-run.
 - CSVs are written as `utf-8-sig` (with BOM) on purpose, so Excel renders Khmer. Don't drop the BOM. Codes stay zero-padded strings; the README explains how Excel users keep the zeros.
 - `archive/2019/`: frozen v1 dumps. Do not modify or regenerate.
@@ -15,8 +15,8 @@ scraped from the NCDD Gazetteer and published as SQL (PostgreSQL, MySQL) and CSV
 ## Regenerating
 
 ```bash
-python scripts/update.py            # from cache
-python scripts/update.py --refresh  # fresh from NCDD (25 province exports, 3 s apart)
+python scripts/sync_ncdd.py            # from cache
+python scripts/sync_ncdd.py --refresh  # fresh from NCDD (25 province exports, 3 s apart)
 ```
 
 The script fails (exit 1, writes nothing) if row counts per province don't match NCDD's summary
