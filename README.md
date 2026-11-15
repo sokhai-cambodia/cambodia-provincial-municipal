@@ -21,7 +21,7 @@ data/
   mysql/      locations.sql                        (MySQL 8)
   postgres/   locations.sql                        (PostgreSQL)
 scripts/
-  update.py   pulls the latest data from NCDD and regenerates everything in data/
+  sync_ncdd.py  pulls the latest data from NCDD and regenerates everything in data/
 archive/
   2019/       the original v1 dumps, no longer updated
 ```
